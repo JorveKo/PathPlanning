@@ -131,18 +131,22 @@ int main() {
           bool is_lane_2_safe = true;
           bool is_lane_3_safe = true;
           
+          //arbitrary min dist to compute the closest car in each lane
           double min_dist_1 = 10000000.0;
           double min_dist_2 = 10000000.0;
           double min_dist_3 = 10000000.0;
           
+          //to save the id of the closest car in each lane
           int closest_id_1 = 0;
           int closest_id_2 = 0;
           int closest_id_3 = 0;
           
+          //speed of the closest car in each lane
           double speed_lane_1 = 0.0;
           double speed_lane_2 = 0.0;
           double speed_lane_3 = 0.0;
           
+          //variable to determine the currently best lane (if free or high speed) --> only if it has been marked as safe
           int best_lane = 1;
           
           // take the end of s for our car position if we have previous points in the pipeline
@@ -173,11 +177,12 @@ int main() {
             //lane1
             if (d >= 0 && d <= 4)
             {
-              if (-15.0 <= car_diff && car_diff <= 20.0 && lane!=0)
+              if (-15.0 <= car_diff && car_diff <= 25.0 && lane!=0)
               {
                 is_lane_1_safe = false;
               }
               
+              //check for closest car speed in lane
               if (car_diff <= 0.0)
               {
                 if ((0.0 - car_diff) < min_dist_1)
@@ -193,11 +198,11 @@ int main() {
             //lane2
             if (d > 4 && d <= 8)
             {
-              if (-15.0 <= car_diff && car_diff <= 20.0 && lane!=1)
+              if (-15.0 <= car_diff && car_diff <= 25.0 && lane!=1)
               {
                 is_lane_2_safe = false;
               }
-              
+              //check for closest car speed in lane
                if (car_diff <= 0.0)
               {
                 if ((0.0 - car_diff) < min_dist_2)
@@ -212,10 +217,11 @@ int main() {
             //lane3
             if (d > 8 && d <= 12)
             {
-              if (-15.0 <= car_diff && car_diff <= 20.0 && lane!=2)
+              if (-15.0 <= car_diff && car_diff <= 25.0 && lane!=2)
               {
                 is_lane_3_safe = false;
               }
+              //check for closest car speed in lane
                if (car_diff <= 0.0)
               {
                 if ((0.0 - car_diff) < min_dist_3)
@@ -233,19 +239,10 @@ int main() {
             // check if car is in my lane
             if (d < (2 + 4 * lane + 2) && d > (2 + 4 * lane - 2))
             {
-              //double vx = sensor_fusion[i][3];
-              //double vy = sensor_fusion[i][4];
-              //double check_speed = sqrt(vx * vx + vy * vy);
-              //double check_car_s = sensor_fusion[i][5];
-              
-              //if there are previous points in the pipeline we need to project into the future
-              //check_car_s += ((double)prev_path_size * 0.02 * check_speed);
-              
-
-              
-              
-              // if the car is in front of me and within a certain distance (30)
-              if ((check_car_s > car_s) && (check_car_s - car_s < 30))
+ 
+                         
+              // if the car is in front of me and within a certain distance (45)
+              if ((check_car_s > car_s) && (check_car_s - car_s < 45))
               {
      
                 too_close = true;
@@ -258,6 +255,8 @@ int main() {
           }
           //accelerate and decelerate within the restrictions
           
+          
+          //determine the best lane, either if it has the highest speed OR is empty for a while
           if ((speed_lane_1 > speed_lane_2 && speed_lane_1 > speed_lane_3) || min_dist_1 > 500)
           {
             best_lane = 0;
@@ -273,6 +272,7 @@ int main() {
             best_lane = 2;
           }
           
+          //change lane if it is first safe, and the best lane and we are too close to another vehicle
           if (is_lane_3_safe && lane!=2 && best_lane ==3 && too_close)
           {
             lane=2; 
